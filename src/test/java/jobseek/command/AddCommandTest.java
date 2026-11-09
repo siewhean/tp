@@ -156,4 +156,29 @@ public class AddCommandTest {
         assertEquals("", command.getNotes());
         assertEquals(null, command.getDeadline());
     }
+
+    @Test
+    public void execute_invalidPortalLinkOrEmail_showsErrorAndDoesNotAdd() throws Exception {
+        ApplicationList applications = new ApplicationList();
+        RecordingUi ui = new RecordingUi();
+
+        new AddCommand("Google", "Intern", null, "not a url", "", "")
+                .execute(applications, ui, TestStorage.create());
+        assertTrue(applications.isEmpty());
+        assertTrue(ui.lastError.contains("Invalid portal link"));
+
+        new AddCommand("Google", "Intern", null, "", "bademail", "")
+                .execute(applications, ui, TestStorage.create());
+        assertTrue(applications.isEmpty());
+        assertTrue(ui.lastError.contains("Invalid email"));
+    }
+
+    private static class RecordingUi extends Ui {
+        private String lastError;
+
+        @Override
+        public void showError(String error) {
+            this.lastError = error;
+        }
+    }
 }

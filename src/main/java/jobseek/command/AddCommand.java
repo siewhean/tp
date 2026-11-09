@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 import jobseek.model.Application;
 import jobseek.model.ApplicationList;
+import jobseek.parser.CommandParser;
 import jobseek.storage.Storage;
 import jobseek.ui.Ui;
 
@@ -112,6 +113,15 @@ public class AddCommand extends UndoableCommand {
         }
         if (role.isEmpty()) {
             ui.showError("Role cannot be empty.");
+            return;
+        }
+
+        if (!portalLink.isEmpty() && !CommandParser.isValidPortalLink(portalLink)) {
+            ui.showError("Invalid portal link. Use a web address (e.g. https://example.com) or leave it blank.");
+            return;
+        }
+        if (!email.isEmpty() && !CommandParser.isValidEmail(email)) {
+            ui.showError("Invalid email. Use a valid email address (e.g. user@example.com) or leave it blank.");
             return;
         }
 

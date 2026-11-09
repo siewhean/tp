@@ -73,6 +73,11 @@ public class CommandParser {
     private static final Pattern KNOWN_FIELD_PREFIX =
             Pattern.compile("(?i)(?:^|\\s)([" + KNOWN_PREFIXES + "])/");
 
+    private static final String PORTAL_LINK_REGEX =
+            "^(https?://\\S+|www\\.\\S+|[a-zA-Z0-9][-a-zA-Z0-9]*(\\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(/\\S*)?)$";
+    private static final String EMAIL_REGEX =
+            "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+
     private static final Logger LOGGER = initLogger();
 
     private CommandParser() {
@@ -168,8 +173,8 @@ public class CommandParser {
             throw new JobSeekException("Both company (c/) and role (r/) are required. " + ADD_USAGE);
         }
         LocalDate deadline = parseDeadline(fields.values.get('d'));
-        String portalLink = fields.values.getOrDefault('p', "");
-        String email = fields.values.getOrDefault('e', "");
+        String portalLink = parsePortalLink(fields.values.get('p'));
+        String email = parseEmail(fields.values.get('e'));
         String notes = fields.values.getOrDefault('n', "");
         return new AddCommand(company, role, deadline, portalLink, email, notes);
     }
@@ -183,8 +188,10 @@ public class CommandParser {
         String stageLabel = fields.values.get('s');
         String deadlineText = fields.values.get('d');
         LocalDate deadline = deadlineText == null || deadlineText.isEmpty() ? null : parseDeadline(deadlineText);
-        String portalLink = fields.values.get('p');
-        String email = fields.values.get('e');
+        String portalText = fields.values.get('p');
+        String portalLink = portalText == null ? null : parsePortalLink(portalText);
+        String emailText = fields.values.get('e');
+        String email = emailText == null ? null : parseEmail(emailText);
         String notes = fields.values.get('n');
         boolean hasDeadline = fields.values.containsKey('d');
 
@@ -306,6 +313,56 @@ public class CommandParser {
             throw new JobSeekException("Invalid stage: '" + text + "'. Valid stages: Applied, "
                     + "Online Assessment (OA), Interview, Offer, Accepted, Rejected, Withdrawn.");
         }
+    }
+
+    /**
+     * Checks if a portal link is a valid web address, or empty.
+     *
+     * @param portalLink Web address string to check.
+     * @return True if null, blank, or formatted as a web address without spaces.
+     */
+    public static boolean isValidPortalLink(String portalLink) {
+        if (portalLink == null || portalLink.isBlank()) {
+            return true;
+        }
+        return portalLink.matches(PORTAL_LINK_REGEX);
+    }
+
+    /**
+     * Checks if an email is a valid email address format, or empty.
+     *
+     * @param email Email string to check.
+     * @return True if null, blank, or formatted as user@domain.tld.
+     */
+    public static boolean isValidEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return true;
+        }
+        return email.matches(EMAIL_REGEX);
+    }
+
+    private static String parsePortalLink(String text) throws JobSeekException {
+        if (text == null || text.isBlank()) {
+            return "";
+        }
+        String stripped = text.strip();
+        if (!isValidPortalLink(stripped)) {
+            throw new JobSeekException("Invalid portal link: '" + stripped
+                    + "'. Use a web address (e.g. https://example.com) or leave it blank.");
+        }
+        return stripped;
+    }
+
+    private static String parseEmail(String text) throws JobSeekException {
+        if (text == null || text.isBlank()) {
+            return "";
+        }
+        String stripped = text.strip();
+        if (!isValidEmail(stripped)) {
+            throw new JobSeekException("Invalid email: '" + stripped
+                    + "'. Use a valid email address (e.g. user@example.com) or leave it blank.");
+        }
+        return stripped;
     }
 
     /**

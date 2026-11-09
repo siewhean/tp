@@ -236,6 +236,20 @@ public class EditCommandTest {
     }
 
     @Test
+    public void execute_invalidPortalLinkOrEmail_showsErrorAndDoesNotUpdate() throws Exception {
+        ApplicationList applications = new ApplicationList();
+        applications.add(new Application("Google", "SWE Intern"));
+
+        EditCommand.editPortalLink(0, "not a url").execute(applications, new Ui(), TestStorage.create());
+        assertEquals("", applications.get(0).getPortalLink());
+        assertTrue(outputStream.toString().contains("Invalid portal link"));
+
+        EditCommand.editEmail(0, "bademail").execute(applications, new Ui(), TestStorage.create());
+        assertEquals("", applications.get(0).getEmail());
+        assertTrue(outputStream.toString().contains("Invalid email"));
+    }
+
+    @Test
     public void execute_multipleApplications_updatesOnlyTarget() throws Exception {
         ApplicationList applications = new ApplicationList();
         applications.add(new Application("Google", "SWE Intern"));
