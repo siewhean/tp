@@ -259,8 +259,8 @@ public class Main {
             return null;
         }
         LocalDate deadline = promptDeadline();
-        String portalLink = promptOptional("Company Portal Link (leave blank if none):");
-        String email = promptOptional("Contact Email (leave blank if none):");
+        String portalLink = promptPortalLink("Company Portal Link (leave blank if none):");
+        String email = promptEmail("Contact Email (leave blank if none):");
         String notes = promptOptional("Notes (leave blank if none):");
         return new AddCommand(company, role, deadline, portalLink, email, notes);
     }
@@ -299,6 +299,32 @@ public class Main {
             throw new PromptCancelledException();
         }
         return input.trim().replace('\t', ' ');
+    }
+
+    /**
+     * Prompts for an optional portal link and repeats until a valid web address or blank is entered.
+     */
+    private String promptPortalLink(String promptLabel) {
+        while (true) {
+            String input = promptOptional(promptLabel);
+            if (input.isEmpty() || CommandParser.isValidPortalLink(input)) {
+                return input;
+            }
+            ui.showError("Invalid portal link. Use a web address (e.g. https://example.com) or leave it blank.");
+        }
+    }
+
+    /**
+     * Prompts for an optional contact email and repeats until a valid email address or blank is entered.
+     */
+    private String promptEmail(String promptLabel) {
+        while (true) {
+            String input = promptOptional(promptLabel);
+            if (input.isEmpty() || CommandParser.isValidEmail(input)) {
+                return input;
+            }
+            ui.showError("Invalid email. Use a valid email address (e.g. user@example.com) or leave it blank.");
+        }
     }
 
     /** Prompts until the user enters a non-blank value or reaches end of input. */
@@ -366,10 +392,10 @@ public class Main {
             LocalDate deadline = promptDeadline();
             return EditCommand.editDeadline(index, deadline);
         case "5":
-            String portalLink = promptOptional("Enter new company portal link (leave blank to clear):");
+            String portalLink = promptPortalLink("Enter new company portal link (leave blank to clear):");
             return EditCommand.editPortalLink(index, portalLink);
         case "6":
-            String email = promptOptional("Enter new contact email (leave blank to clear):");
+            String email = promptEmail("Enter new contact email (leave blank to clear):");
             return EditCommand.editEmail(index, email);
         case "7":
             String notes = promptOptional("Enter new notes (leave blank to clear):");
@@ -397,8 +423,8 @@ public class Main {
             return null;
         }
         LocalDate allDeadline = promptDeadline();
-        String allPortalLink = promptOptional("Company Portal Link (leave blank to clear):");
-        String allEmail = promptOptional("Contact Email (leave blank to clear):");
+        String allPortalLink = promptPortalLink("Company Portal Link (leave blank to clear):");
+        String allEmail = promptEmail("Contact Email (leave blank to clear):");
         String allNotes = promptOptional("Notes (leave blank to clear):");
         return EditCommand.editAll(index, allCompany, allRole, allStage,
                 allDeadline, allPortalLink, allEmail, allNotes);

@@ -7,6 +7,7 @@ import java.util.Objects;
 import jobseek.model.Application;
 import jobseek.model.ApplicationList;
 import jobseek.model.RecruitmentStage;
+import jobseek.parser.CommandParser;
 import jobseek.storage.Storage;
 import jobseek.ui.Ui;
 
@@ -236,6 +237,15 @@ public class EditCommand extends UndoableCommand {
                 && !isDeadlineUpdated && newPortalLink == null && newEmail == null && newNotes == null) {
             ui.showError("At least one field (company, role, recruitment stage, deadline, portal link, email, or notes)"
                     + " must be specified for editing.");
+            return;
+        }
+
+        if (newPortalLink != null && !newPortalLink.isEmpty() && !CommandParser.isValidPortalLink(newPortalLink)) {
+            ui.showError("Invalid portal link. Use a web address (e.g. https://example.com) or leave it blank.");
+            return;
+        }
+        if (newEmail != null && !newEmail.isEmpty() && !CommandParser.isValidEmail(newEmail)) {
+            ui.showError("Invalid email. Use a valid email address (e.g. user@example.com) or leave it blank.");
             return;
         }
 

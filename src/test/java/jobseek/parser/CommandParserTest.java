@@ -268,6 +268,34 @@ public class CommandParserTest {
     }
 
     @Test
+    public void parse_addWithInvalidEmail_throws() {
+        JobSeekException e = assertThrows(JobSeekException.class,
+                () -> CommandParser.parse("add c/Google r/Intern e/notanemail"));
+        assertTrue(e.getMessage().contains("Invalid email: 'notanemail'"));
+    }
+
+    @Test
+    public void parse_addWithInvalidPortalLink_throws() {
+        JobSeekException e = assertThrows(JobSeekException.class,
+                () -> CommandParser.parse("add c/Google r/Intern p/fake website"));
+        assertTrue(e.getMessage().contains("Invalid portal link: 'fake website'"));
+    }
+
+    @Test
+    public void parse_editWithInvalidEmail_throws() {
+        JobSeekException e = assertThrows(JobSeekException.class,
+                () -> CommandParser.parse("edit 1 e/notanemail"));
+        assertTrue(e.getMessage().contains("Invalid email: 'notanemail'"));
+    }
+
+    @Test
+    public void parse_editWithInvalidPortalLink_throws() {
+        JobSeekException e = assertThrows(JobSeekException.class,
+                () -> CommandParser.parse("edit 1 p/fake website"));
+        assertTrue(e.getMessage().contains("Invalid portal link: 'fake website'"));
+    }
+
+    @Test
     public void parse_addAndEditWithUppercasePrefixes_parsedCorrectly() throws Exception {
         AddCommand addCmd = assertInstanceOf(AddCommand.class,
                 CommandParser.parse("add C/Netflix R/Backend Engineer"));
