@@ -156,4 +156,25 @@ public class AddCommandTest {
         assertEquals("", command.getNotes());
         assertEquals(null, command.getDeadline());
     }
+
+    @Test
+    public void execute_duplicateCompanyAndRole_displaysWarning() throws Exception {
+        ApplicationList applications = new ApplicationList();
+        RecordingUi ui = new RecordingUi();
+        new AddCommand("Google", "SWE Intern").execute(applications, ui, TestStorage.create());
+        assertNull(ui.lastError);
+
+        new AddCommand("google", "swe intern").execute(applications, ui, TestStorage.create());
+        assertEquals(2, applications.size());
+        assertTrue(ui.lastError.contains("Warning: An application for 'google' with role 'swe intern' already exists"));
+    }
+
+    private static class RecordingUi extends Ui {
+        private String lastError;
+
+        @Override
+        public void showError(String error) {
+            this.lastError = error;
+        }
+    }
 }

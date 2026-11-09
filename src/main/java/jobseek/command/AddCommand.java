@@ -115,12 +115,27 @@ public class AddCommand extends UndoableCommand {
             return;
         }
 
+        boolean isDuplicate = false;
+        for (int i = 0; i < applications.size(); i++) {
+            Application existing = applications.get(i);
+            if (existing.getCompany().equalsIgnoreCase(company)
+                    && existing.getRole().equalsIgnoreCase(role)) {
+                isDuplicate = true;
+                break;
+            }
+        }
+
         int sizeBefore = applications.size();
         Application application = new Application(company, role, false, Application.DEFAULT_STAGE,
                 deadline, portalLink, email, notes);
         applications.add(application);
         addedApplication = application;
         markChanged();
+
+        if (isDuplicate) {
+            ui.showError("Warning: An application for '" + company + "' with role '" + role
+                    + "' already exists in your list.");
+        }
 
         assert applications.size() == sizeBefore + 1 : "Adding one application should increase list size by one";
         assert applications.get(applications.size() - 1) == application
